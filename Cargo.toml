@@ -1,0 +1,9 @@
+[package]
+name = "rust_game_dev"
+version = "0.1.0"
+authors = ["Christoph Müller <muellch@student.ethz.ch>"]
+
+[dependencies]
+piston_window = "0.70.0"
+cgmath = "0.15.0"
+rustfest-game-assets = { git = "https://github.com/Vurich/rustfest-game-assets.git"}
