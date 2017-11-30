@@ -8,7 +8,7 @@ use cgmath::*;
 use rustfest_game_assets::*;
 //use std::vec;
 //use std::option;
-//use std::cmp;
+use std::cmp;
 
 struct Player {
     position: Point2<f64>,
@@ -44,25 +44,25 @@ struct GameState {
     bullets: Vec<Bullet>,
 }
 
-//impl Player {
-//    fn shoot<'a>(mut self, energy: f64) -> Result<f64, &'a str>{
-//        if self.cooldown <= 0. {
-////            let e = cmp::min(energy, self.energylevel);
-//            let e;
-//            if energy.gt(&self.energylevel){
-//                e = self.energylevel;
-//            }
-//            else {
-//                e = energy;
-//            }
-//            self.energylevel -= e;
-//            return Ok(e);
-//        }
-//        else {
-//            return Err("You're not ready to shoot again yet!");
-//        }
-//    }
-//}
+impl Player {
+    fn shoot<'a>(&mut self, energy: f64) -> Result<f64, &'a str>{
+        if self.cooldown <= 0. {
+//            let e = cmp::min(energy, self.energylevel);
+            let e;
+            if energy.gt(&self.energylevel){
+                e = self.energylevel;
+            }
+            else {
+                e = energy;
+            }
+            self.energylevel -= e;
+            return Ok(e);
+        }
+        else {
+            return Err("You're not ready to shoot again yet!");
+        }
+    }
+}
 
 fn spawn_bullet(mut s: GameState, position: Point2<f64>, velocity: Vector2<f64>) {
     s.bullets.push(Bullet{
@@ -119,17 +119,25 @@ fn main() {
             }
 
             if controller.shootybang {
-//                let r = player.shoot(50.);
-//                match r {
-//                    Ok(_f64) => {}
-//                    Err(_str) => {}
-//                }
+                let r = player.shoot(200.);
+                match r {
+                    Ok(_f64) => {
+                        player.cooldown = 10.;
+                        println!("Yay");
+
+                    }
+                    Err(_str) => {println!("Boo {}", player.cooldown)}
+                }
             }
 
             player.position += player.velocity * dt;
             player.energylevel += 100. * dt;
+            player.cooldown -= 100. * dt;
+            if player.cooldown < 0. {
+                player.cooldown = 0.;
+            }
 
-            for mut bullet in gamestate.bullets {
+            for bullet in gamestate.bullets.iter_mut() {
                 bullet.position += bullet.velocity * dt;
             }
         });
