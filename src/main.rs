@@ -8,7 +8,6 @@ use cgmath::*;
 use rustfest_game_assets::*;
 //use std::vec;
 //use std::option;
-use std::cmp;
 
 struct Player {
     position: Point2<f64>,
@@ -64,12 +63,15 @@ impl Player {
     }
 }
 
-fn spawn_bullet(mut s: GameState, position: Point2<f64>, velocity: Vector2<f64>) {
-    s.bullets.push(Bullet{
-        position: position,
-        velocity: velocity,
-    })
+impl GameState {
+    fn spawn_bullet(&mut self, position: Point2<f64>, velocity: Vector2<f64>) {
+        self.bullets.push(Bullet{
+            position: position,
+            velocity: velocity,
+        })
+    }
 }
+
 
 
 fn main() {
@@ -98,7 +100,7 @@ fn main() {
 
     while let Some(event) = window.next() {
         event.update(|&UpdateArgs{ dt }| { // lambdas are called closures in rust.
-            let acceleration_factor = 5.0;
+            let acceleration_factor = 1.0;
             let direction = Basis2::from_angle(player.rotation)
                 .rotate_vector(Vector2::unit_y());
 
@@ -123,10 +125,11 @@ fn main() {
                 match r {
                     Ok(_f64) => {
                         player.cooldown = 10.;
-                        println!("Yay");
+                        gamestate.spawn_bullet(player.position, direction * 2.);
+                        println!("Yay [{:?}]", player.position);
 
                     }
-                    Err(_str) => {println!("Boo {}", player.cooldown)}
+                    Err(_str) => {}
                 }
             }
 
@@ -167,17 +170,32 @@ fn main() {
 
         window.draw_2d(&event, |_, graphics| {
             clear([0.2,0.2,0.2,1.], graphics);
+
             polygon(
                 [1., 0.5, 0.5, 1.],
                 PLAYER,
                 math::identity()
-                    .scale(0.1, 0.1)
                     .trans(player.position.x, player.position.y)
+                    .scale(0.1, 0.1)
                     .rot_rad(player.rotation.0),
                 graphics,
             );
+
+            for bullet in gamestate.bullets.iter() {
+                polygon(
+                    [1., 0.5, 0.5, 1.],
+                    BULLET,
+                    math::identity()
+                        .trans(bullet.position.x, bullet.position.y)
+                        .scale(0.01, 0.01)
+                        .rot_rad(bullet.velocity.angle(Vector2::new(0.,1.)).0),
+                    graphics,
+                );
+            }
 
         });
     }
 
 }
+
+
